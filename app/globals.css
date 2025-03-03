@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #00a651; /* Brand green */
+  --primary-light: #00c661;
+  --primary-dark: #008541;
+  --secondary: #002868; /* Brand blue */
+  --secondary-light: #003878;
+  --secondary-dark: #001858;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #e8f5e9; /* Light green background */
+  --accent-foreground: #0f172a;
+  --border: #e2e8f0;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-medium py-2 px-6 rounded-md transition-colors duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary-dark text-white font-medium py-2 px-6 rounded-md transition-colors duration-300;
+  }
+
+  .btn-outline {
+    @apply border border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-6 rounded-md transition-colors duration-300;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold mb-4 text-secondary;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-muted-foreground mb-8 max-w-2xl;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-r from-secondary to-primary;
+  }
+}
+
