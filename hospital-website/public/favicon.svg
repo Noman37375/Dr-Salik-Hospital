@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#000000"/>
+  <g transform="translate(2, 2) scale(0.875)">
+    <!-- Spine dots -->
+    <circle cx="6" cy="4" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="6" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="8" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="10" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="12" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="14" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="16" r="1" fill="#00FF00"/>
+    <circle cx="6" cy="18" r="1" fill="#00FF00"/>
+    <!-- Figure -->
+    <path d="M14 4 L14 12 Q14 16 10 18" stroke="#00FF00" stroke-width="2"/>
+    <path d="M14 4 L14 12 Q14 16 18 18" stroke="#000080" stroke-width="2"/>
+    <circle cx="14" cy="4" r="2" fill="#00FF00"/>
+  </g>
+</svg> 
