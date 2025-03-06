@@ -1,65 +1,13 @@
+"use client"
+
+import React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { Calendar, Star, ArrowLeft, Phone, MapPin } from "lucide-react"
+import { doctors } from "../doctors-data"
 import { notFound } from "next/navigation"
-import { ArrowLeft, MapPin, Phone, Mail, Star } from "lucide-react"
 
-// Doctor data (same as in doctors/page.tsx, but with additional details)
-const doctors = [
-  {
-    id: "john-smith",
-    name: "Dr. John Smith",
-    specialty: "Cardiology",
-    image: "/placeholder.svg?height=400&width=400",
-    description:
-      "Dr. John Smith is a board-certified cardiologist with over 15 years of experience in treating heart conditions.",
-    education: [
-      "MD from Harvard Medical School",
-      "Residency in Internal Medicine at Massachusetts General Hospital",
-      "Fellowship in Cardiology at Johns Hopkins Hospital",
-    ],
-    certifications: ["American Board of Internal Medicine", "American Board of Cardiology"],
-    expertise: ["Coronary Artery Disease", "Heart Failure", "Cardiac Imaging", "Preventive Cardiology"],
-    languages: ["English", "Spanish"],
-    officeHours: [
-      { day: "Monday", hours: "9:00 AM - 5:00 PM" },
-      { day: "Tuesday", hours: "9:00 AM - 5:00 PM" },
-      { day: "Wednesday", hours: "9:00 AM - 5:00 PM" },
-      { day: "Thursday", hours: "9:00 AM - 5:00 PM" },
-      { day: "Friday", hours: "9:00 AM - 3:00 PM" },
-    ],
-    reviews: [
-      {
-        author: "Jane D.",
-        rating: 5,
-        comment:
-          "Dr. Smith is an excellent cardiologist. He took the time to explain my condition and treatment options thoroughly.",
-      },
-      {
-        author: "John M.",
-        rating: 4,
-        comment: "Very knowledgeable and professional. The wait time was a bit long, but the care was worth it.",
-      },
-    ],
-  },
-  // ... (add similar detailed data for other doctors)
-]
-
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const doctor = doctors.find((d) => d.id === params.id)
-
-  if (!doctor) {
-    return {
-      title: "Doctor Not Found | Dr. Salik Hospital",
-    }
-  }
-
-  return {
-    title: `${doctor.name} - ${doctor.specialty} | Dr. Salik Hospital`,
-    description: doctor.description,
-  }
-}
-
-export default function DoctorPage({ params }: { params: { id: string } }) {
+export default function DoctorProfilePage({ params }: { params: { id: string } }) {
   const doctor = doctors.find((d) => d.id === params.id)
 
   if (!doctor) {
@@ -67,144 +15,172 @@ export default function DoctorPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div>
-      {/* Banner */}
-      <section className="bg-gradient-to-r from-blue-500 to-blue-600 py-20">
-        <div className="container mx-auto">
-          <div className="flex items-center mb-4">
-            <Link href="/doctors" className="text-blue-100 hover:text-white flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Doctors
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-primary/5 to-primary/10 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <Link 
+              href="/doctors" 
+              className="inline-flex items-center text-gray-600 hover:text-primary group transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Back to Doctors</span>
             </Link>
-          </div>
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="w-48 h-48 relative">
-              <Image
-                src={doctor.image || "/placeholder.svg"}
-                alt={doctor.name}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-full"
-              />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">{doctor.name}</h1>
-              <p className="text-xl text-blue-100 mb-4">{doctor.specialty}</p>
-              <p className="text-blue-100 max-w-2xl">{doctor.description}</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Doctor Details */}
-      <section className="py-16">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="bg-white p-8 rounded-lg shadow-md mb-8">
-                <h2 className="text-2xl font-bold mb-4">About Dr. {doctor.name.split(" ")[1]}</h2>
-                <p className="text-gray-700 mb-6">{doctor.description}</p>
-
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-3">Education</h3>
-                  <ul className="list-disc list-inside text-gray-700">
-                    {doctor.education.map((edu, index) => (
-                      <li key={index}>{edu}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold mb-3">Certifications</h3>
-                  <ul className="list-disc list-inside text-gray-700">
-                    {doctor.certifications.map((cert, index) => (
-                      <li key={index}>{cert}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-bold mb-3">Areas of Expertise</h3>
-                  <ul className="list-disc list-inside text-gray-700">
-                    {doctor.expertise.map((exp, index) => (
-                      <li key={index}>{exp}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="bg-white p-8 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-4">Patient Reviews</h2>
-                {doctor.reviews.map((review, index) => (
-                  <div key={index} className="mb-4 pb-4 border-b border-gray-200 last:border-b-0 last:pb-0 last:mb-0">
-                    <div className="flex items-center mb-2">
-                      <div className="flex mr-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-5 w-5 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                          />
-                        ))}
+            <div className="mt-8 bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+              <div className="grid md:grid-cols-2 gap-8 p-6 md:p-8 lg:p-12">
+                <div className="space-y-6">
+                  {/* Title Section */}
+                  <div className="space-y-4">
+                    {doctor.isHeadDoctor && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
+                        <Star className="w-4 h-4" />
+                        Head of Doctors & Managing Director
                       </div>
-                      <span className="font-bold">{review.author}</span>
-                    </div>
-                    <p className="text-gray-700">{review.comment}</p>
+                    )}
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{doctor.name}</h1>
+                    {doctor.qualifications && (
+                      <p className="text-primary font-medium text-lg">{doctor.qualifications}</p>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
 
-            <div>
-              <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 className="text-xl font-bold mb-4">Book an Appointment</h3>
-                <p className="text-gray-700 mb-4">
-                  To schedule an appointment with Dr. {doctor.name.split(" ")[1]}, please use our online booking system
-                  or call our appointment line.
-                </p>
-                <Link href="/appointment" className="btn-primary w-full text-center">
-                  Book Now
-                </Link>
-              </div>
+                  {/* Specialties */}
+                  <div className="flex flex-wrap gap-3">
+                    {doctor.specialty.map((spec) => (
+                      <div 
+                        key={spec} 
+                        className="px-4 py-2 bg-gray-50 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors"
+                      >
+                        {spec}
+                      </div>
+                    ))}
+                  </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 className="text-xl font-bold mb-4">Contact Information</h3>
-                <div className="space-y-3">
-                  <p className="flex items-center gap-2">
-                    <Phone className="text-primary" size={20} />
-                    <span>(123) 456-7890</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Mail className="text-primary" size={20} />
-                    <span>{doctor.name.toLowerCase().replace(" ", ".")}@drsalik.com</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <MapPin className="text-primary" size={20} />
-                    <span>
-                      123 Medical Center Dr.
-                      <br />
-                      Suite 200
-                      <br />
-                      Cityville, State 12345
-                    </span>
-                  </p>
+                  {/* Description */}
+                  {doctor.description && (
+                    <p className="text-gray-600 leading-relaxed text-lg">{doctor.description}</p>
+                  )}
+
+                  {/* Experience & Education */}
+                  {(doctor.experience || doctor.education) && (
+                    <div className="grid md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
+                      {doctor.experience && (
+                        <div className="p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-primary" />
+                            Experience
+                          </h2>
+                          <p className="text-gray-600">{doctor.experience}</p>
+                        </div>
+                      )}
+                      {doctor.education && (
+                        <div className="p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <h2 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-primary" />
+                            Education
+                          </h2>
+                          <p className="text-gray-600">{doctor.education}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                    <Link 
+                      href="/appointment" 
+                      className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark transition-colors"
+                    >
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Appointment
+                    </Link>
+                    <Link 
+                      href="/contact" 
+                      className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors"
+                    >
+                      <Phone className="w-5 h-5 mr-2" />
+                      Contact
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-bold mb-4">Office Hours</h3>
-                <div className="space-y-2">
-                  {doctor.officeHours.map((schedule, index) => (
-                    <p key={index} className="flex justify-between">
-                      <span>{schedule.day}:</span>
-                      <span>{schedule.hours}</span>
-                    </p>
-                  ))}
+                {/* Image Section */}
+                <div className="relative h-[500px] md:h-[600px] rounded-2xl overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Image 
+                    src={doctor.image || "/placeholder.svg"} 
+                    alt={doctor.name} 
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover hover:scale-105 transition-transform duration-700"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* Schedule Section */}
+      <div className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Office Hours */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-4">Office Hours</h3>
+                <div className="space-y-2 text-gray-600">
+                  <div className="flex justify-between">
+                    <span>Monday - Friday</span>
+                    <span>9:00 AM - 5:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Saturday</span>
+                    <span>9:00 AM - 1:00 PM</span>
+                  </div>
+                  <div className="flex justify-between text-gray-400">
+                    <span>Sunday</span>
+                    <span>Closed</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-4">Location</h3>
+                <div className="flex items-start gap-3 text-gray-600">
+                  <MapPin className="w-5 h-5 text-primary shrink-0 mt-1" />
+                  <p className="leading-relaxed">
+                    Dr. Salik Hospital,<br />
+                    123 Medical Center Drive,<br />
+                    Karachi, Pakistan
+                  </p>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
+                <div className="space-y-4 text-gray-600">
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-primary" />
+                    <span>+92 123 456 7890</span>
+                  </div>
+                  <Link 
+                    href="/appointment" 
+                    className="inline-flex items-center text-primary font-medium hover:text-primary-dark"
+                  >
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Schedule an Appointment
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
