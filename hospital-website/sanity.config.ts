@@ -29,6 +29,7 @@ export default defineConfig({
     allowCredentials: true,
     origin: [
       'https://dr-salik-hospital.vercel.app/',
+      'https://drsalikhospital.com',
       'http://localhost:3001',
       'http://localhost:3000',
       'http://localhost:3333',
