@@ -2,8 +2,7 @@ import type React from "react"
 import type { Metadata } from "next/types"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
+import MainContent from "@/components/MainContent"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -36,9 +35,7 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+        <MainContent>{children}</MainContent>
       </body>
     </html>
   )
