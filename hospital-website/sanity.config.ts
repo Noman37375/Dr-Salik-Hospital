@@ -28,7 +28,7 @@ export default defineConfig({
   cors: {
     allowCredentials: true,
     origin: [
-     
+      'https://dr-salik-hospital.vercel.app/',
       'http://localhost:3001',
       'http://localhost:3000',
       'http://localhost:3333',
