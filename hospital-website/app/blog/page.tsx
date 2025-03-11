@@ -230,7 +230,7 @@ export default function BlogPage() {
             </form>
           </div>
         </div>
-      </div>
+        </div>
     </div>
   )
 }
