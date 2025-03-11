@@ -25,6 +25,26 @@ export default {
       validation: (Rule: any) => Rule.required(),
     },
     {
+      name: 'image',
+      title: 'Profile Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'text',
+      description: 'A brief description of the doctor',
+    },
+    {
+      name: 'experience',
+      title: 'Experience',
+      type: 'string',
+      description: 'Years of experience',
+    },
+    {
       name: 'timing',
       title: 'Consultation Timing',
       type: 'text',
@@ -39,28 +59,32 @@ export default {
       validation: (Rule: any) => Rule.required(),
     },
     {
-      name: 'order',
-      title: 'Display Order',
-      type: 'number',
-      description: 'Order in which to display this doctor',
-    },
-    {
       name: 'isOnCall',
       title: 'Available on Call',
       type: 'boolean',
       description: 'Check if doctor is available on call',
+      initialValue: false,
     },
     {
-      name: 'requiresAppointment',
-      title: 'Requires Pre-Appointment',
+      name: 'isHeadDoctor',
+      title: 'Is Head Doctor',
       type: 'boolean',
-      description: 'Check if pre-appointment is required',
+      description: 'Check if this is the head doctor',
+      initialValue: false,
+    },
+    {
+      name: 'order',
+      title: 'Display Order',
+      type: 'number',
+      description: 'Order in which to display this doctor (lower numbers appear first)',
+      initialValue: 99,
     }
   ],
   preview: {
     select: {
       title: 'name',
       subtitle: 'specialization',
+      media: 'image'
     },
   },
 } 
