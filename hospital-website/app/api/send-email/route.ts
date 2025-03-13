@@ -29,7 +29,24 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { doctorName, specialization, name, email, phone, preferredDate, message } = body;
+    const { 
+      doctorName, 
+      specialization, 
+      name, 
+      email, 
+      phone, 
+      selectedDate,
+      selectedTime,
+      message 
+    } = body;
+
+    // Format the date
+    const formattedDate = new Date(selectedDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     // Create email content with better formatting
     const emailContent = `
@@ -39,41 +56,74 @@ export async function POST(request: Request) {
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-            .section { margin-bottom: 20px; }
-            .footer { font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+            .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+            .section { margin-bottom: 20px; background-color: #fff; padding: 15px; border-radius: 5px; border: 1px solid #eee; }
+            .section h3 { color: #2563eb; margin-top: 0; }
+            .info-row { display: flex; margin-bottom: 8px; }
+            .info-label { font-weight: bold; min-width: 140px; }
+            .footer { font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; text-align: center; }
+            .highlight { background-color: #f0f9ff; padding: 10px; border-radius: 4px; margin: 10px 0; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h2>New Appointment Request</h2>
+              <h2 style="color: #1e40af; margin: 0;">New Appointment Request</h2>
+              <p style="color: #6b7280; margin-top: 5px;">Submitted on ${new Date().toLocaleString()}</p>
             </div>
             
             <div class="section">
-              <h3>Doctor Details:</h3>
-              <p><strong>Doctor:</strong> ${doctorName}</p>
-              <p><strong>Specialization:</strong> ${specialization}</p>
+              <h3>📅 Appointment Details</h3>
+              <div class="highlight">
+                <div class="info-row">
+                  <span class="info-label">Date:</span>
+                  <span>${formattedDate}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Time:</span>
+                  <span>${selectedTime}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>👨‍⚕️ Doctor Information</h3>
+              <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span>${doctorName}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Specialization:</span>
+                <span>${specialization}</span>
+              </div>
             </div>
             
             <div class="section">
-              <h3>Patient Details:</h3>
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Phone:</strong> ${phone}</p>
-              <p><strong>Preferred Date:</strong> ${preferredDate}</p>
+              <h3>👤 Patient Information</h3>
+              <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span>${name}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span>${email}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Phone:</span>
+                <span>${phone}</span>
+              </div>
             </div>
             
             ${message ? `
               <div class="section">
-                <h3>Additional Message:</h3>
-                <p>${message}</p>
+                <h3>💬 Additional Message</h3>
+                <p style="margin: 0;">${message}</p>
               </div>
             ` : ''}
             
             <div class="footer">
               <p>This is an automated email from Dr. Salik Hospital's appointment system.</p>
-              <p>Date: ${new Date().toLocaleString()}</p>
+              <p style="margin-bottom: 0;">Please review and confirm the appointment with the patient.</p>
             </div>
           </div>
         </body>
@@ -84,12 +134,66 @@ export async function POST(request: Request) {
     const info = await transporter.sendMail({
       from: `"Dr. Salik Hospital" <${process.env.EMAIL_USER}>`,
       to: process.env.HOSPITAL_EMAIL,
-      subject: `New Appointment Request - ${doctorName}`,
+      subject: `New Appointment Request - ${doctorName} - ${formattedDate}`,
       html: emailContent,
       replyTo: email, // Allow replying directly to the patient
     });
 
-    console.log('Email sent successfully:', info.messageId);
+    // Send confirmation email to patient
+    const patientEmailContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+            .section { margin-bottom: 20px; background-color: #fff; padding: 15px; border-radius: 5px; border: 1px solid #eee; }
+            .highlight { background-color: #f0f9ff; padding: 10px; border-radius: 4px; margin: 10px 0; }
+            .footer { font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h2 style="color: #1e40af; margin: 0;">Appointment Request Received</h2>
+              <p style="color: #6b7280; margin-top: 5px;">Thank you for choosing Dr. Salik Hospital</p>
+            </div>
+            
+            <div class="section">
+              <p>Dear ${name},</p>
+              <p>We have received your appointment request with the following details:</p>
+              
+              <div class="highlight">
+                <p><strong>Doctor:</strong> ${doctorName}</p>
+                <p><strong>Specialization:</strong> ${specialization}</p>
+                <p><strong>Date:</strong> ${formattedDate}</p>
+                <p><strong>Time:</strong> ${selectedTime}</p>
+              </div>
+              
+              <p>Our team will review your request and contact you shortly to confirm your appointment.</p>
+              <p>If you need to make any changes or have questions, please contact us at:</p>
+              <p>Phone: +92 300 1234567</p>
+            </div>
+            
+            <div class="footer">
+              <p>This is an automated confirmation email. Please do not reply to this email.</p>
+              <p style="margin-bottom: 0;">Dr. Salik Hospital - Your Health, Our Priority</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Send confirmation email to patient
+    await transporter.sendMail({
+      from: `"Dr. Salik Hospital" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Appointment Request Confirmation - Dr. Salik Hospital`,
+      html: patientEmailContent,
+    });
+
+    console.log('Emails sent successfully:', info.messageId);
     return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (error) {
     console.error('Email sending failed:', error);

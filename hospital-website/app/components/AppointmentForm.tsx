@@ -3,11 +3,18 @@ import { Calendar, Clock, Phone, Mail, User, MessageSquare, X } from 'lucide-rea
 import { groq } from 'next-sanity';
 import { client } from '@/lib/sanity';
 
+interface TimingSlot {
+  day: string;
+  startTime: string;
+  endTime: string;
+  type: 'pre' | 'followup';
+}
+
 interface Doctor {
   _id: string;
   name: string;
   specialization: string;
-  timing: string;
+  consultationTimings: TimingSlot[];
   fees: number;
 }
 
@@ -22,16 +29,36 @@ interface FormErrors {
   name?: string;
   email?: string;
   phone?: string;
-  preferredDate?: string;
+  selectedDate?: string;
+  selectedTime?: string;
   doctorId?: string;
 }
+
+// Add helper function to generate time slots
+const generateTimeSlots = (startTime: string, endTime: string): string[] => {
+  const slots: string[] = [];
+  const start = new Date(`01/01/2024 ${startTime}`);
+  const end = new Date(`01/01/2024 ${endTime}`);
+  
+  while (start < end) {
+    slots.push(start.toLocaleTimeString('en-US', { 
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true 
+    }).replace(/\s+/g, ' ').trim());
+    start.setMinutes(start.getMinutes() + 30);
+  }
+  
+  return slots;
+};
 
 export default function AppointmentForm({ doctorName, specialization, isOpen, onClose }: AppointmentFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    preferredDate: '',
+    selectedDate: '',
+    selectedTime: '',
     message: '',
     doctorId: ''
   });
@@ -42,13 +69,20 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isLoadingDoctors, setIsLoadingDoctors] = useState(true);
 
+  // Add state for available dates and times
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+
+  // Move selectedDoctor declaration here
+  const selectedDoctor = doctors.find(d => d._id === formData.doctorId);
+
   useEffect(() => {
     const fetchDoctors = async () => {
       const query = groq`*[_type == "doctor"] | order(order asc) {
         _id,
         name,
         specialization,
-        timing,
+        consultationTimings,
         fees
       }`;
       
@@ -76,6 +110,52 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
     }
   }, [doctorName, doctors]);
 
+  // Update the useEffect for available dates
+  useEffect(() => {
+    if (selectedDoctor) {
+      const dates: string[] = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Look ahead for the next 4 weeks
+      for (let i = 0; i < 28; i++) {
+        const date = new Date();
+        date.setDate(today.getDate() + i);
+        const currentDay = date.toLocaleDateString('en-US', { weekday: 'long' });
+        
+        // Check if the doctor has any timings for this day
+        if (selectedDoctor.consultationTimings.some(timing => timing.day === currentDay)) {
+          dates.push(date.toISOString().split('T')[0]);
+        }
+      }
+      
+      setAvailableDates(dates);
+    } else {
+      setAvailableDates([]);
+    }
+  }, [selectedDoctor]);
+
+  // Update the useEffect for available times
+  useEffect(() => {
+    if (selectedDoctor && formData.selectedDate) {
+      const selectedDay = new Date(formData.selectedDate)
+        .toLocaleDateString('en-US', { weekday: 'long' });
+      
+      // Get all timings for the selected day
+      const dayTimings = selectedDoctor.consultationTimings
+        .filter(timing => timing.day === selectedDay);
+
+      // Generate all time slots for each timing period
+      const allTimeSlots = dayTimings.flatMap(timing => 
+        generateTimeSlots(timing.startTime, timing.endTime)
+      );
+      
+      setAvailableTimes(allTimeSlots);
+    } else {
+      setAvailableTimes([]);
+    }
+  }, [selectedDoctor, formData.selectedDate]);
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     
@@ -97,10 +177,12 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
       newErrors.phone = 'Please enter a valid phone number';
     }
 
-    const selectedDate = new Date(formData.preferredDate);
-    const today = new Date();
-    if (selectedDate < today) {
-      newErrors.preferredDate = 'Please select a future date';
+    if (!formData.selectedDate) {
+      newErrors.selectedDate = 'Please select an available date';
+    }
+
+    if (!formData.selectedTime) {
+      newErrors.selectedTime = 'Please select an available time';
     }
 
     setErrors(newErrors);
@@ -142,7 +224,8 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
           name: '',
           email: '',
           phone: '',
-          preferredDate: '',
+          selectedDate: '',
+          selectedTime: '',
           message: '',
           doctorId: ''
         });
@@ -167,24 +250,22 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
 
   if (!isOpen) return null;
 
-  const selectedDoctor = doctors.find(d => d._id === formData.doctorId);
-
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto relative my-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto relative max-h-[90vh] flex flex-col">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors z-10"
           disabled={isSubmitting}
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Form header */}
-        <div className="p-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">Book Appointment</h2>
-          <p className="text-xs text-gray-600 mt-0.5">
+        <div className="p-3 border-b border-gray-100 flex-shrink-0">
+          <h2 className="text-lg font-bold text-gray-900">Book Appointment</h2>
+          <p className="text-xs text-gray-600">
             Fill in your details to request an appointment
           </p>
         </div>
@@ -207,7 +288,7 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-4 space-y-3">
+          <form onSubmit={handleSubmit} className="p-4 space-y-2.5 overflow-y-auto">
             {/* Doctor Selection */}
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -244,12 +325,24 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
 
             {/* Selected Doctor Info */}
             {selectedDoctor && (
-              <div className="p-2.5 bg-blue-50 rounded-lg text-xs">
+              <div className="p-2 bg-blue-50 rounded-lg text-xs">
                 <div className="flex items-start gap-2">
                   <Clock className="w-3.5 h-3.5 text-blue-500 mt-0.5" />
                   <div>
-                    <p className="font-medium text-gray-900">Available Timing</p>
-                    <p className="text-gray-600">{selectedDoctor.timing}</p>
+                    <p className="font-medium text-gray-900">Available Timings</p>
+                    <div className="space-y-1">
+                      {selectedDoctor.consultationTimings.map((timing, index) => (
+                        <div key={index} className="text-gray-600 flex items-start gap-1">
+                          <span className="font-medium min-w-[80px]">{timing.day}:</span>
+                          <div>
+                            <div>{timing.startTime} - {timing.endTime}</div>
+                            <div className="text-blue-500 text-[11px]">
+                              ({timing.type === 'pre' ? 'Pre-Appointment' : 'Follow-up'})
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 mt-2">
@@ -262,8 +355,8 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
               </div>
             )}
 
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Personal Information with reduced gap */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Your Name
@@ -336,25 +429,71 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Preferred Date
+                  Available Date
                 </label>
                 <div className="relative">
-                  <input
-                    type="date"
-                    name="preferredDate"
+                  <select
+                    name="selectedDate"
                     required
-                    className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500 ${
-                      errors.preferredDate ? 'border-red-500' : 'border-gray-200'
+                    className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg appearance-none bg-white focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500 ${
+                      errors.selectedDate ? 'border-red-500' : 'border-gray-200'
                     }`}
-                    value={formData.preferredDate}
+                    value={formData.selectedDate}
                     onChange={handleInputChange}
-                    disabled={isSubmitting}
-                    min={new Date().toISOString().split('T')[0]}
-                  />
+                    disabled={isSubmitting || !selectedDoctor}
+                  >
+                    <option value="">Select Date</option>
+                    {availableDates.map((date) => (
+                      <option key={date} value={date}>
+                        {new Date(date).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </option>
+                    ))}
+                  </select>
                   <Calendar className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
-                {errors.preferredDate && (
-                  <p className="mt-1 text-xs text-red-500">{errors.preferredDate}</p>
+                {errors.selectedDate && (
+                  <p className="mt-1 text-xs text-red-500">{errors.selectedDate}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Available Time
+                </label>
+                <div className="relative">
+                  <select
+                    name="selectedTime"
+                    required
+                    className={`w-full pl-8 pr-3 py-2 text-sm border rounded-lg appearance-none bg-white focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500 ${
+                      errors.selectedTime ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    value={formData.selectedTime}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting || !formData.selectedDate}
+                  >
+                    <option value="">Select Time</option>
+                    {availableTimes.map((time) => (
+                      <option key={time} value={time}>{time}</option>
+                    ))}
+                  </select>
+                  <Clock className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                {errors.selectedTime && (
+                  <p className="mt-1 text-xs text-red-500">{errors.selectedTime}</p>
                 )}
               </div>
             </div>
@@ -376,8 +515,19 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
               </div>
             </div>
 
+            {/* Important Information Section with reduced padding */}
+            <div className="p-2.5 bg-gray-50 rounded-lg space-y-1.5">
+              <h3 className="text-sm font-semibold text-gray-900">Important Information</h3>
+              <ul className="list-disc list-inside space-y-1">
+                <li className="text-xs text-gray-600">Please arrive 15 minutes before your scheduled appointment time.</li>
+                <li className="text-xs text-gray-600">Bring your insurance card and a valid ID to your appointment.</li>
+                <li className="text-xs text-gray-600">If you need to cancel or reschedule, please do so at least 24 hours in advance.</li>
+                <li className="text-xs text-gray-600">For any urgent medical concerns, please visit our Emergency Department or call 911.</li>
+              </ul>
+            </div>
+
             {submitStatus === 'error' && (
-              <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-xs text-red-600">
                   Failed to send appointment request. Please try again.
                 </p>
