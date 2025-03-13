@@ -522,7 +522,7 @@ export default function AppointmentForm({ doctorName, specialization, isOpen, on
                 <li className="text-xs text-gray-600">Please arrive 15 minutes before your scheduled appointment time.</li>
                 <li className="text-xs text-gray-600">Bring your insurance card and a valid ID to your appointment.</li>
                 <li className="text-xs text-gray-600">If you need to cancel or reschedule, please do so at least 24 hours in advance.</li>
-                <li className="text-xs text-gray-600">For any urgent medical concerns, please visit our Emergency Department or call 911.</li>
+                <li className="text-xs text-gray-600">For any urgent medical concerns, please visit our Emergency Department or call 0317-7843816.</li>
               </ul>
             </div>
 

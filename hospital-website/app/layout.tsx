@@ -3,6 +3,7 @@ import type { Metadata } from "next/types"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import MainContent from "@/components/MainContent"
+import ChatBot from './components/ChatBot'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -36,6 +37,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <MainContent>{children}</MainContent>
+        <ChatBot />
       </body>
     </html>
   )

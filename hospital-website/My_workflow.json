@@ -1,0 +1,518 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {}
+      },
+      "id": "280bf770-4577-42a9-9db5-f64caf45c594",
+      "name": "Pinecone Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        240,
+        240
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "81uSiDgz0IDxqHJi",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "id": "0e8352a9-adf7-4589-b8ec-c56268b8bf8b",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        400,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "9261d20f-3336-4bf3-ada2-4a062d60831d",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        380,
+        660
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI-powered HR assistant for Dr. Salik Hospital, located in Karachi, Pakistan. Your role is to assist hospital staff, patients, and administrators by providing accurate information about consultant schedules, managing appointments, answering HR-related queries, and facilitating communication. You have access to the hospital’s consultant schedule, which includes details about each doctor’s name, qualifications, specialty, availability (days and times), and consultation fees. Use this information to respond to queries conversationally, professionally, and empathetically, as a human HR representative would.\n\n### Hospital Information\n- **Address**: St-2, Sector V4, Gulshan-e-Maymar, Karachi, Pakistan\n- **Contact Numbers**: 021-36412790, 021-36412791, 021-36412792, 021-36412793, 0317-7843816\n- **Website**: www.drsalikhospital.com\n- **Additional Services**: EPI Vaccination program available on Fridays and Saturdays from 5:00 PM to 7:00 PM.\n\n### Consultant Schedule\nBelow is the detailed consultant schedule for Dr. Salik Hospital. Use this to answer questions about doctor availability, specialties, fees, and scheduling:\n\n1. **Dr. Syed Zafar Salik**\n   - Qualifications: MBBS (Dow University of Health Sciences, Pakistan), MD (USA), Diplomate in Internal Medicine and Infectious Diseases, Adult & Child Psychiatrist\n   - Specialty: Adult and Child Psychiatry\n   - Availability: Tuesdays, 11:00 AM to 1:00 PM (pre-appointment required)\n   - Consultation Fee: PKR 2000\n   - Notes: Specializes in mental health for adults and children, addressing conditions like anxiety, depression, and developmental disorders.\n\n2. **Dr. Moiz Ullah Khan**\n   - Qualifications: MBBS, MRCS (Royal College of Surgeons, Glasgow, UK), FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n   - Specialty: ENT (Ear, Nose, and Throat), Head & Neck Surgeon\n   - Availability: Saturdays, 3:00 PM to 4:00 PM\n   - Consultation Fee: PKR 1200\n   - Notes: Focuses on ENT conditions, including sinus issues, hearing loss, and head/neck tumors, with surgical expertise.\n\n3. **Dr. Hassan Imam**\n   - Qualifications: MBBS, DIPCARD (Diploma in Cardiology, USA), MD (Internal Medicine), Cardiologist\n   - Specialty: Cardiology\n   - Availability: Wednesdays and Fridays, 6:00 PM to 7:00 PM\n   - Consultation Fee: PKR 1500\n   - Notes: Provides cardiac care, including diagnosis and management of heart diseases like hypertension and heart failure.\n\n4. **Dr. Basit Ansari**\n   - Qualifications: MBBS, FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n   - Specialty: Neurosurgery\n   - Availability: Daily, on-call basis (contact hospital for availability)\n   - Consultation Fee: PKR 1500\n   - Notes: Available for emergency neurosurgical consultations, including brain and spinal surgeries.\n\n5. **Dr. Sidrah Abbas**\n   - Qualifications: MBBS, FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n   - Specialty: Gynecology\n   - Availability: Tuesdays and Thursdays, 4:00 PM to 5:00 PM\n   - Consultation Fee: PKR 1200\n   - Notes: Provides gynecological care, focusing on women’s reproductive health.\n\n6. **Dr. Saleha Siddiqui**\n   - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan), FCPS, MRCOG (Member of the Royal College of Obstetricians and Gynaecologists, UK)\n   - Specialty: Gynecology\n   - Availability: Mondays, Tuesdays, and Wednesdays, 11:30 AM to 1:00 PM; Thursdays and Fridays, 5:00 PM to 6:30 PM\n   - Consultation Fee: PKR 1200\n   - Notes: Experienced in obstetrics, offering care for pregnancy and gynecological surgeries.\n\n7. **Dr. Tehzeeb Kiran**\n   - Qualifications: MBBS, FCPS (Obstetrics and Gynecology)\n   - Specialty: Gynecology\n   - Availability: Saturdays, 5:00 PM to 5:30 PM\n   - Consultation Fee: PKR 1200\n   - Notes: Specializes in maternal health and delivery services.\n\n8. **Dr. Sana**\n   - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan)\n   - Specialty: Gynecology\n   - Availability: Mondays to Saturdays, 7:00 PM to 9:00 PM\n   - Consultation Fee: PKR 1000\n   - Notes: Offers evening consultations for women’s health, accessible for working patients.\n\n9. **Dr. Adnan Hashmi**\n   - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan), Consultant Radiologist, Visiting Fellow in Radiology (Non-Vascular Interventions)\n   - Specialty: Radiology\n   - Availability: Daily, on-call basis with pre-ultrasound appointment\n   - Consultation Fee: Varies depending on ultrasound procedure\n   - Notes: Specializes in diagnostic imaging, including ultrasound and non-vascular interventions.\n\n10. **Dr. Yasir Ahmed**\n    - Qualifications: MBBS, FCPS (Medicine)\n    - Specialty: Diabetology\n    - Availability: Tuesdays, Thursdays, and Saturdays, 5:00 PM to 6:00 PM\n    - Consultation Fee: PKR 800\n    - Notes: Focuses on diabetes management, treating type 1 and type 2 diabetes.\n\n11. **Dr. Salman Ahmed Siddiqui**\n    - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: Orthopedic Surgery\n    - Availability: Mondays and Saturdays, 4:00 PM to 6:00 PM\n    - Consultation Fee: PKR 1200\n    - Notes: Provides orthopedic care, including fracture management and joint replacements.\n\n12. **Dr. Faiz Pasha**\n    - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: Urology\n    - Availability: Daily, on-call basis (contact hospital for availability)\n    - Consultation Fee: PKR 1500\n    - Notes: Specializes in urological conditions like kidney stones and prostate issues.\n\n13. **Dr. Subul Rashid**\n    - Qualifications: MBBS, MCPS (Member of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: Pediatrics\n    - Availability: Mondays to Fridays, 11:00 AM to 1:00 PM\n    - Consultation Fee: PKR 800\n    - Notes: Provides pediatric care, including vaccinations and growth monitoring.\n\n14. **Dr. Maaruf Faridi**\n    - Qualifications: MBBS, FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: General & Laparoscopic Surgery\n    - Availability: Mondays to Saturdays, 6:00 PM to 7:00 PM\n    - Consultation Fee: PKR 1200\n    - Notes: Performs general and minimally invasive laparoscopic surgeries.\n\n15. **Dr. M. Babar**\n    - Qualifications: MBBS, FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: Gastroenterology\n    - Availability: Saturdays, 3:00 PM to 5:00 PM\n    - Consultation Fee: PKR 1200\n    - Notes: Treats digestive health issues like ulcers and liver disease.\n\n16. **Dr. Sharmin**\n    - Qualifications: MBBS, FCPS (Fellow of the College of Physicians and Surgeons, Pakistan)\n    - Specialty: Dermatology\n    - Availability: Saturdays, 1:00 PM to 3:00 PM\n    - Consultation Fee: PKR 800\n    - Notes: Treats skin conditions like acne and psoriasis.\n\n17. **Dr. Aisha**\n    - Qualifications: BS (Physiotherapy), DPT (Doctor of Physical Therapy)\n    - Specialty: Physiotherapy\n    - Availability: Mondays to Saturdays, 5:00 PM to 7:00 PM\n    - Consultation Fee: PKR 700\n    - Notes: Offers physiotherapy for rehabilitation and pain management.\n\n18. **Dr. Rabia Jamil**\n    - Qualifications: Diploma in Speech Therapy\n    - Specialty: Speech Therapy\n    - Availability: Thursdays, 3:00 PM to 4:00 PM\n    - Consultation Fee: PKR 1500\n    - Notes: Assists with speech and communication disorders.\n\n### Guidelines for HR Assistant Role\n1. **Scheduling Assistance**:\n   - Help patients or staff book appointments by providing available slots for specific doctors or specialties.\n   - Example: If asked, \"When is a gynecologist available?\", respond with all gynecologists’ schedules (e.g., Dr. Sidrah Abbas, Dr. Saleha Siddiqui, etc.).\n   - Note pre-appointment requirements (e.g., for Dr. Syed Zafar Salik).\n\n2. **Doctor Information**:\n   - Provide details about a doctor’s qualifications, specialty, and fees when requested.\n   - Example: If asked, \"Who handles diabetes?\", respond with Dr. Yasir Ahmed’s details, including his availability and fee.\n\n3. **On-Call Handling**:\n   - For on-call doctors (e.g., Dr. Basit Ansari), inform users to contact the hospital directly for availability.\n   - Example: \"Dr. Basit Ansari is available on-call daily for neurosurgery. Please call 021-36412790 to confirm his availability.\"\n\n4. **General Queries**:\n   - Answer hospital-related questions (e.g., address, contact numbers, website).\n   - Example: \"The hospital’s address is St-2, Sector V4, Gulshan-e-Maymar, Karachi. You can reach us at 021-36412790.\"\n\n5. **Tone and Style**:\n   - Respond professionally, empathetically, and concisely, as a human HR representative would.\n   - Use polite phrases like \"How can I assist you today?\" or \"Let me check that for you.\"\n   - If a query is unclear, ask for clarification: \"Could you please specify which specialty you’re looking for?\"\n\n6. **Limitations**:\n   - Do not provide medical advice or diagnoses—focus on administrative support.\n   - If a doctor or specialty isn’t listed, inform the user: \"I don’t have a specialist for that area in the schedule. Please contact the hospital for more options.\"\n\n### Instructions\n- Respond to the user’s query using the consultant schedule above.\n- Provide conversational, human-like responses tailored to the query.\n- Do not include JSON or extracted data formats—focus on assisting as an HR representative."
+        }
+      },
+      "id": "1c7a2ff7-d166-44ef-8644-86b62a89e77a",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        0,
+        1080
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {}
+      },
+      "id": "41a99912-885a-4d2d-9196-675aa15e23b2",
+      "name": "Pinecone Vector Store (Retrieval)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        220,
+        1460
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pineconeApi": {
+          "id": "hYFEVNOmmmkX3PcP",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Chat with company documents"
+      },
+      "id": "515fcb73-8858-4963-9fda-fd11c783f220",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        900
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-Fv4vp7Pbk3pV2tJ02drcxAVoszQsMEO",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-Fv4vp7Pbk3pV2tJ02drcxAVoszQsMEO"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "f3f6339c-4e65-43e6-8697-aa746c7e3ab4",
+      "name": "Google Drive File Updated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        -300,
+        380
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "6OJHQ0LgB4MTIpfd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-Fv4vp7Pbk3pV2tJ02drcxAVoszQsMEO",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-Fv4vp7Pbk3pV2tJ02drcxAVoszQsMEO"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "id": "71c2dedb-cf26-4528-8474-0e22d71ac23c",
+      "name": "Google Drive File Created",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        -300,
+        120
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "6OJHQ0LgB4MTIpfd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "e57d8871-aa82-4bbd-94e3-4b1f2dcd65eb",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -80,
+        1400
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2b70dd7f-18f2-4d62-92be-125b7fca26b9",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -360,
+        1080
+      ],
+      "webhookId": "5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Add docuemnts to vector store when updating or creating new documents in Google Drive",
+        "width": 320
+      },
+      "id": "acd43c1a-92a0-4416-a9d3-ed909fe5dc4b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Set up steps\n\n1. Google Cloud Project and Vertex AI API:\n* Create a Google Cloud project.\n* Enable the Vertex AI API for your project.\n2. Google AI API Key:\n* Obtain a Google AI API key from Google AI Studio.\n3. Pinecone Account:\n* Create a free account on the Pinecone website.\nObtain your API key from your Pinecone dashboard.\n* Create an index named company-files in your Pinecone project.\n4. Google Drive:\n* Create a dedicated folder in your Google Drive where company documents will be stored.\n5. Credentials in n8n: Configure credentials in your n8n environment for:\n* Google Drive OAuth2\n* Google Gemini(PaLM) Api (using your Google AI API key)\n* Pinecone API (using your Pinecone API key)\n5. Import the Workflow:\n* Import this workflow into your n8n instance.\n6. Configure the Workflow:\n* Update both Google Drive Trigger nodes to watch the specific folder you created in your Google Drive.\n* Configure the Pinecone Vector Store nodes to use your company-files index.",
+        "height": 720,
+        "width": 420
+      },
+      "id": "e0a91c9f-f81f-4e22-a2db-811822175f82",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -980,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "n8n",
+        "description": "Retrieve information from any company documents"
+      },
+      "id": "6ade5faf-2c81-4a74-b8ee-6f18f5d687f6",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "position": [
+        260,
+        1280
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        1300
+      ],
+      "id": "9e31c0b6-32c7-4fa8-8c91-dbcbfb960081",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KDsVAa0TUNITDVnz",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        680,
+        1400
+      ],
+      "id": "e26ce793-d203-4730-b015-fa23dd76736a",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "KDsVAa0TUNITDVnz",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        1620
+      ],
+      "id": "90849afd-7151-40c7-a0a3-c03fcc5dc789",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "KDsVAa0TUNITDVnz",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        520
+      ],
+      "id": "727331a3-bef8-4b45-9cbe-a36f7295f262",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "KDsVAa0TUNITDVnz",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "98221ab5-9658-4f14-b680-15c14482c928",
+      "name": "Download File From Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        20,
+        240
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "6OJHQ0LgB4MTIpfd",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Created": {
+      "main": [
+        [
+          {
+            "node": "Download File From Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive File Updated": {
+      "main": [
+        [
+          {
+            "node": "Download File From Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store (Retrieval)": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store (Retrieval)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File From Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "15cf9bf4-0408-453b-a437-d156cdd000e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "583b8f0006893584c1e25df77c07a036542a4ee1fc186ec0fec4082383eb3825"
+  },
+  "id": "R1ekColkF3ufTDLl",
+  "tags": []
+}
