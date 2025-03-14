@@ -6,9 +6,7 @@ import os
 from dotenv import load_dotenv
 import openai
 from pinecone import Pinecone
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
+import numpy as np
 
 # Load environment variables
 load_dotenv()
@@ -32,18 +30,7 @@ app.add_middleware(
 # Initialize clients
 openai.api_key = os.getenv("OPENAI_API_KEY")
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-embeddings = OpenAIEmbeddings(
-    model="text-embedding-ada-002",
-    openai_api_key=os.getenv("OPENAI_API_KEY")
-)
 index = pc.Index("n8n")
-
-# Create chat model
-llm = ChatOpenAI(
-    temperature=0.7,
-    model="gpt-3.5-turbo",
-    openai_api_key=os.getenv("OPENAI_API_KEY")
-)
 
 class ChatMessage(BaseModel):
     message: str
@@ -57,8 +44,14 @@ async def chat(message: ChatMessage):
                 content={"error": "Message cannot be empty"}
             )
 
-        # Get embeddings and search for context
-        query_embedding = embeddings.embed_query(message.message)
+        # Get embeddings
+        response = openai.Embedding.create(
+            input=message.message,
+            model="text-embedding-ada-002"
+        )
+        query_embedding = response['data'][0]['embedding']
+
+        # Search for context
         results = index.query(
             vector=query_embedding,
             top_k=3,
@@ -72,21 +65,22 @@ async def chat(message: ChatMessage):
             if result.metadata and "text" in result.metadata
         ])
 
-        # Create prompt
-        prompt = PromptTemplate(
-            template="""You are an AI-powered HR assistant for Dr. Salik Hospital. Provide accurate information about the hospital and its services.
+        # Generate chat completion
+        system_message = """You are an AI-powered HR assistant for Dr. Salik Hospital. 
+        Provide accurate information about the hospital and its services based on the given context."""
 
-Context: {context}
-
-Answer: """
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": f"Context: {context}\n\nQuestion: {message.message}"}
+            ],
+            temperature=0.7
         )
-
-        # Generate response
-        response = llm(prompt.format(context=context))
 
         return JSONResponse(
             status_code=200,
-            content={"response": response.choices[0].message.content}
+            content={"response": completion.choices[0].message['content']}
         )
     except Exception as e:
         return JSONResponse(
