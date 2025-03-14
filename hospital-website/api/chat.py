@@ -19,9 +19,11 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_origins=["https://drsalikhospital.com/"],
-    allow_origins=["https://dr-salik-hospital.vercel.app/"],    # Update this with your frontend URL in production # Update this with your frontend URL in production
+    allow_origins=[
+        "https://drsalikhospital.com",
+        "https://dr-salik-hospital.vercel.app",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
