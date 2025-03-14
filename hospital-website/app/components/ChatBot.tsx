@@ -1,5 +1,6 @@
 'use client';
 
+import { type ChangeEvent, type FormEvent } from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 
@@ -23,17 +24,17 @@ export default function ChatBot() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
+    setMessages((prev: Message[]) => [...prev, { type: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,13 +45,23 @@ export default function ChatBot() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error(data.error || data.detail || 'Failed to get response');
       }
 
-      setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+      if (!data.response) {
+        throw new Error('No response received from server');
+      }
+
+      setMessages((prev: Message[]) => [...prev, { type: 'bot', content: data.response }]);
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error. Please try again.' }]);
+      setMessages((prev: Message[]) => [
+        ...prev, 
+        { 
+          type: 'bot', 
+          content: error instanceof Error ? error.message : 'Sorry, I encountered an error. Please try again.' 
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +101,7 @@ export default function ChatBot() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
+            {messages.map((message: Message, index: number) => (
               <div
                 key={index}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
